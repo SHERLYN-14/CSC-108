@@ -6,33 +6,41 @@
 
 import pygame, sys,  time, heapq
 
-# __init__ method
+# Method
 class PuzzleState:
     def __init__(self, board, moves=0, prev=None):
-        self.board = board                      # 2D list representing the puzzle state.
-        self.moves = moves                      # Number of moves taken to reach this state.
-        self.prev = prev                        # Previous state in the path.
-        self.empty_pos = self.find_empty()      # Position of the empty tile (0).
+        self.board = board                      # 2D to represent the puzzle 
+        self.moves = moves                      # Number of moves taken to reach this state
+        self.prev = prev                        # for the previous state in the path
+        self.empty_pos = self.find_empty()      # Position of the empty tile 
 
-# find_empty method
     def find_empty(self):                       
-        for i in range(3):                      # Iterate through rows.   
-            for j in range(3):                  # Iterate through columns.
-                if self.board[i][j] == 0:       # If empty tile is found:
-                    return (i, j)               # Return its position as (row, col).
+        for i in range(3):                      # i is for rows to iterate   
+            for j in range(3):                  # j is for rows to iterate  
+                if self.board[i][j] == 0:       # empty tile is found
+                    return (i, j)               # return its position as ((i)row, (j)col).
         return None
 
 
     def is_goal(self):
-        return self.board == [[0, 1, 2], [3, 4, 5], [6, 7, 8]]      # board matches the solved state
+        return self.board == [[0, 1, 2], [3, 4, 5], [6, 7, 8]]     
+        # board matches the solved state
+        #   [0, 1, 2]
+        #   [3, 4, 5]
+        #   [6, 7, 8]
 
     def neighbors(self):
         x, y = self.empty_pos
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  
+
+        #   (-1, 0) -- UP
+        #   (1, 0)  -- DOWN
+        #   (0, -1) -- LEFT 
+        #   (0, 1)  -- RIGHT
         neighbors = []
 
         for dx, dy in directions:
-            nx, ny = x + dx, y + dy                     # Calculate new positions.
+            nx, ny = x + dx, y + dy                     # to calculate the new positions.
             if 0 <= nx < 3 and 0 <= ny < 3:             # Ensure the new position is valid.
                 new_board = [row[:] for row in self.board]      # Copy current board.
                 # Swap empty tile with the target tile.
@@ -116,20 +124,24 @@ def draw_board(screen, board, font, move_count, show_solve_button=False):
             else:
                 pygame.draw.rect(screen, (200, 200, 200), (x, y, tile_size, tile_size), border_radius=10)
 
-    # Display move count
+    # Display move count of the (AI) taken
     move_text = font.render(f"Moves: {move_count}", True, (0, 0, 0))
     screen.blit(move_text, (10, 320))
 
     # Draw solve button if needed
     if show_solve_button:
-        button_width, button_height = 150, 50
+        # Size of the button
+        button_width, button_height = 125, 50
+
         # Draw a blue rectangle for the "SOLVE" button
         pygame.draw.rect(screen, (0, 0, 155), (230, 310, button_width, button_height))
-        # Render the "SOLVE" text
-        button_text = font.render("SOLVE(AI)", True, (255, 255, 255))
-        #button_rect = button_text.get_rect(center=(280, 330))
-        button_rect = button_text.get_rect(center=(230 + button_width // 2, 310 + button_height // 2))  # Centered in the 
-        # Blit the text onto the button
+
+        # button "SOLVE" text
+        button_text = font.render("SOLVE", True, (255, 255, 255))
+
+
+        button_rect = button_text.get_rect(center=(230 + button_width // 2, 310 + button_height // 2))  
+        # Blit the text to button
         screen.blit(button_text, button_rect)
 
 
