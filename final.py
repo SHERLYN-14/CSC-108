@@ -62,7 +62,11 @@ class PuzzleState:
 
 
 # Heuristic Function
-# Calculates the Manhattan distance heuristic, measuring how far each tile is from its target position
+# Calculates the Manhattan distance heuristic, 
+# measuring how far each tile is from its target 
+# position how many steps each tile needs to move (UP or DOWN)
+# Manhattan_distance sum of the absolute differences between the current positions 
+# and the goal positions of all tiles on the board
 def manhattan_distance(state):
     distance = 0
     for i in range(3):                      # Loop through rows (i)
@@ -73,8 +77,12 @@ def manhattan_distance(state):
                 distance += abs(i - target_x) + abs(j - target_y)
     return distance
 
-#A Algorithm*
-def astar_solve(initial_state):
+# Using a A* Algorithm
+# is good for pathfinding and puzzle game ( 8 Puzzle Game )
+# used to find the shortest path ( sequence of the move )
+# from the initial state to goal state
+# explore possible moves
+def as_algo_solve(initial_state):
     priority_queue = []
     heapq.heappush(priority_queue, (0, initial_state))      # Push initial state with cost 0
     visited = set()
@@ -148,54 +156,70 @@ def draw_board(screen, board, font, move_count, show_solve_button=False):
 
 def get_tile_at_pos(pos):
     x, y = pos
+
+    # x and y for the mouse position 
     col = x // 100
     row = y // 100
-    if 0 <= row < 3 and 0 <= col < 3:
+    if 0 <= row < 3 and 0 <= col < 3:       # to calculate tile position 3x3 grid
         return row, col
     return None
 
 
+# pygame library
 def main():
     pygame.init()
 
     # Screen setup
-    screen = pygame.display.set_mode((350, 350))
-    pygame.display.set_caption("Eight Puzzle Game")
+    screen = pygame.display.set_mode((350, 350))        # 350x350 pixel for the game window
+    pygame.display.set_caption("Eight Puzzle Game")     # Set the name of the game Eight Puzzle Game
     font = pygame.font.Font(None, 48)
 
-    # For puzzle setup 
+    # For puzzle setup
+    # Set up the tiles from 0 to 8 
     original_board = [
         [0, 1, 2],
         [3, 4, 5],
         [6, 7, 8]
     ]
     puzzle_state = PuzzleState([row[:] for row in original_board])  # Copy of the original board
-    arranging = True
-    move_count = 0
+    arranging = True        # rearranging the board
+    move_count = 0      # number of movemnet taken by the AI
     solution = []
 
-    while True:
-        for event in pygame.event.get():
+    while True:         # loop to keep the game running
+        for event in pygame.event.get():        # for the user click the mouse and quiting the game
+
+            # exit the game if quit click by the user
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
+            # for rearranging the tile click by the user
             if arranging:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     tile = get_tile_at_pos(pos)
+
+                    # to check if the tile is empty
                     if tile:
                         empty_x, empty_y = puzzle_state.empty_pos
                         if abs(tile[0] - empty_x) + abs(tile[1] - empty_y) == 1:
+
                             # Swap clicked tile with the empty tile
+                            # swap the tile number click on the board
+                            # in the function of empty_pos is to update the position of the empty tile
                             puzzle_state.board[empty_x][empty_y], puzzle_state.board[tile[0]][tile[1]] = \
                                 puzzle_state.board[tile[0]][tile[1]], puzzle_state.board[empty_x][empty_y]
                             puzzle_state.empty_pos = tile
 
                     # Check if "SOLVE" button is clicked
+                    # for the arranging 
+                    # calculate the solution using by the A* Algorithm
                     if 230 <= pos[0] <= 330 and 310 <= pos[1] <= 350:
                         arranging = False
-                        solution = astar_solve(PuzzleState(puzzle_state.board))
+                        solution = as_algo_solve(PuzzleState(puzzle_state.board))
+
+                        # if no solutuion founc
                         if not solution:
                             print("No solution found!")
                             pygame.quit()
@@ -204,17 +228,22 @@ def main():
 
         if arranging:
             draw_board(screen, puzzle_state.board, font, move_count, show_solve_button=True)
+
+        # update the board
+        # and to increment the move_count .... count the move by the AI
         else:
             if move_count < len(solution):
                 draw_board(screen, solution[move_count], font, move_count)
                 pygame.display.flip()
                 time.sleep(0.5)
                 move_count += 1
+
+            # display solved board
             elif move_count == len(solution):  # After showing all solution steps
                 draw_board(screen, original_board, font, move_count)  # Display the solved board
                 pygame.display.flip()
                 time.sleep(2)
-                arranging = True  # Reset to arranging mode
+                arranging = True  # Reset to arranging mode ( ORIGINAL STATE )
                 puzzle_state = PuzzleState([row[:] for row in original_board])  # Reset to original board
 
         pygame.display.flip()
