@@ -16,9 +16,9 @@ class PuzzleState:
 
     def find_empty(self):                       
         for i in range(3):                      # i is for rows to iterate   
-            for j in range(3):                  # j is for rows to iterate  
+            for j in range(3):                  # j is for column to iterate  
                 if self.board[i][j] == 0:       # empty tile is found
-                    return (i, j)               # return its position as ((i)row, (j)col).
+                    return (i, j)               # return its position as ((i)row, (j)col)
         return None
 
 
@@ -50,70 +50,71 @@ class PuzzleState:
 
         return neighbors
 
-    # Used for comparison and hashing when storing states in data structures.
+    # Used for comparison and hashing when storing states in data structures
     def __eq__(self, other):
-        return self.board == other.board        # Checks if two states are identical.
+        return self.board == other.board        # Checks if two states are identical
 
     def __lt__(self, other):
-        return self.moves < other.moves         # Compares states based on moves (priority queue).
+        return self.moves < other.moves         # Compares states based on moves (priority queue)
 
     def __hash__(self):
-        return hash(str(self.board))            # Hashes the state for storing in sets.
+        return hash(str(self.board))            # Hashes the state for storing in sets
 
 
 # Heuristic Function
-# Calculates the Manhattan distance heuristic, measuring how far each tile is from its target position.
+# Calculates the Manhattan distance heuristic, measuring how far each tile is from its target position
 def manhattan_distance(state):
     distance = 0
-    for i in range(3):                      # Loop through rows.
-        for j in range(3):                  # Loop through columns.
+    for i in range(3):                      # Loop through rows (i)
+        for j in range(3):                  # Loop through columns (j)
             value = state.board[i][j]
             if value != 0:
-                target_x, target_y = value // 3, value % 3          # Compute target position.
+                target_x, target_y = value // 3, value % 3          # Compute target position
                 distance += abs(i - target_x) + abs(j - target_y)
     return distance
 
 #A Algorithm*
 def astar_solve(initial_state):
     priority_queue = []
-    heapq.heappush(priority_queue, (0, initial_state))      # Push initial state with cost 0.
+    heapq.heappush(priority_queue, (0, initial_state))      # Push initial state with cost 0
     visited = set()
 
     while priority_queue:
-        _, current = heapq.heappop(priority_queue)          # Get state with lowest cost.
+        _, current = heapq.heappop(priority_queue)          # Get state with lowest cost
 
-        if current.is_goal():                               # If it's the goal state, reconstruct path.
+        if current.is_goal():                               # If it's the goal state, reconstruct path
             return reconstruct_path(current)
 
-        visited.add(hash(current))                           # Mark current state as visited.
+        visited.add(hash(current))                           # Mark current state as visited
 
-        for neighbor in current.neighbors():                # Loop through neighbors.
-            if hash(neighbor) not in visited:               # Process unvisited states.
-                cost = neighbor.moves + manhattan_distance(neighbor)    # Total cost (g + h).
-                heapq.heappush(priority_queue, (cost, neighbor))         # Add to priority queue.
+        for neighbor in current.neighbors():                # Loop through neighbors
+            if hash(neighbor) not in visited:               # Process unvisited states
+                cost = neighbor.moves + manhattan_distance(neighbor)    # Total cost (g + h)
+                heapq.heappush(priority_queue, (cost, neighbor))         # Add to priority queue
 
-
-    return None         # Return None if no solution exists.
+    return None         # Return None if no solution exists
 
 
 def reconstruct_path(state):
     path = []
     while state:
-        path.append(state.board)    # Append the current state's board.
-        state = state.prev          # Move to the previous state.
-    return path[::-1]               # Reverse the path to start with the initial state.
+        path.append(state.board)    # for the current state's board
+        state = state.prev          # to Move previous state
+    return path[::-1]               # Reverse the path to start with the initial state
 
 
 # Drawing the Board
 # Pygame visualization
+# Requierment for the Board 
+# (screen, board, font, move count (count AI moves), show SOLVE button to trigger)
 def draw_board(screen, board, font, move_count, show_solve_button=False):
     screen.fill((255, 255, 255))  # White background
     tile_size = 90
     gap = 10
 
     # Draw puzzle board
-    for i in range(3):
-        for j in range(3):
+    for i in range(3):                  # i is for the rows in the board
+        for j in range(3):              # j is for the column  in the board
             value = board[i][j]
             x, y = j * (tile_size + gap), i * (tile_size + gap)
             if value != 0:      # Draw tiles with numbers (0 - 8)
@@ -133,7 +134,7 @@ def draw_board(screen, board, font, move_count, show_solve_button=False):
         # Size of the button
         button_width, button_height = 125, 50
 
-        # Draw a blue rectangle for the "SOLVE" button
+        # blue rectangle for the "SOLVE" button
         pygame.draw.rect(screen, (0, 0, 155), (230, 310, button_width, button_height))
 
         # button "SOLVE" text
